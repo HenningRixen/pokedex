@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type cliCommand struct {
@@ -18,7 +19,8 @@ func main() {
 	commandmap := commandsMapCreate()
 	for scanner.Scan() {
 		inputCommand := scanner.Text()
-		switch inputCommand {
+		cleanInputCommand := cleanInput(inputCommand)
+		switch cleanInputCommand {
 		case "help":
 			if cmd, exits := commandmap["help"]; exits {
 				cmd.callback()
@@ -28,10 +30,14 @@ func main() {
 				cmd.callback()
 			}
 		default:
-			fmt.Println("Unkown Command", inputCommand)
+			fmt.Println("Unkown Command", cleanInputCommand)
 			fmt.Print("Pokedex: ")
 		}
 	}
+}
+
+func cleanInput(inputText string) string {
+	return strings.ToLower(inputText)
 }
 
 func commandsMapCreate() map[string]cliCommand {
