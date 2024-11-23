@@ -51,3 +51,12 @@ func commandMapb(config *config) error {
 
 	return nil
 }
+
+func commandExplore(config *config) error {
+	exploreLocationAreaStruct := config.pokeApiClient.GetLoactionPokemonEncounterBodyResponse()
+	for _, result := range exploreLocationAreaStruct.PokemonEncounters {
+		fmt.Println(result.Pokemon.Name)
+		fmt.Print("Pokedex: ")
+	}
+	return nil
+}

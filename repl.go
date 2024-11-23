@@ -39,6 +39,10 @@ func startLoop(config *config) {
 			if cmd, exits := commandmap["mapb"]; exits {
 				cmd.callback(config)
 			}
+		case "explore":
+			if cmd, exits := commandmap["explore"]; exits {
+				cmd.callback(config)
+			}
 		default:
 			fmt.Println("Unkown Command", cleanInputCommand)
 			fmt.Print("Pokedex: ")
@@ -77,6 +81,11 @@ func commandsMapCreate() map[string]cliCommand {
 			name:        "map",
 			description: "Get Previous 20 Locations in Pokemon",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Get Pokemon you can encounter in this Location",
+			callback:    commandExplore,
 		},
 	}
 }
