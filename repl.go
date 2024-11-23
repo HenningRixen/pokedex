@@ -13,6 +13,7 @@ type config struct {
 	pokeApiClient       pokeapi.Client
 	nextLocationUrl     *string
 	previousLocationUrl *string
+	location            *string
 }
 
 func startLoop(config *config) {
@@ -22,36 +23,46 @@ func startLoop(config *config) {
 	for scanner.Scan() {
 		inputCommand := scanner.Text()
 		cleanInputCommand := cleanInput(inputCommand)
-		switch cleanInputCommand {
-		case "help":
+		if cleanInputCommand[0] == "help" {
 			if cmd, exits := commandmap["help"]; exits {
 				cmd.callback(config)
 			}
-		case "exit":
+		}
+		if cleanInputCommand[0] == "exit" {
 			if cmd, exits := commandmap["exit"]; exits {
 				cmd.callback(config)
 			}
-		case "map":
+		}
+		if cleanInputCommand[0] == "map" {
 			if cmd, exits := commandmap["map"]; exits {
 				cmd.callback(config)
 			}
-		case "mapb":
+		}
+		if cleanInputCommand[0] == "mapb" {
 			if cmd, exits := commandmap["mapb"]; exits {
 				cmd.callback(config)
 			}
-		case "explore":
-			if cmd, exits := commandmap["explore"]; exits {
-				cmd.callback(config)
-			}
-		default:
-			fmt.Println("Unkown Command", cleanInputCommand)
-			fmt.Print("Pokedex: ")
 		}
+		if cleanInputCommand[0] == "explore" {
+			if cmd, exits := commandmap["explore"]; exits {
+				if len(cleanInputCommand) == 1 {
+					fmt.Print("Pokedex: explore needs two inputs seperated by withespace")
+					fmt.Print("Pokedex: ")
+				} else {
+					config.location = &cleanInputCommand[1]
+					cmd.callback(config)
+				}
+			}
+		}
+		fmt.Println("Unkown Command", cleanInputCommand)
+		fmt.Print("Pokedex: ")
 	}
 }
 
-func cleanInput(inputText string) string {
-	return strings.ToLower(inputText)
+func cleanInput(inputText string) []string {
+	lower := strings.ToLower(inputText)
+	words := strings.Split(lower, " ")
+	return words
 }
 
 type cliCommand struct {
@@ -78,7 +89,7 @@ func commandsMapCreate() map[string]cliCommand {
 			callback:    commandMap,
 		},
 		"mapb": {
-			name:        "map",
+			name:        "mapb",
 			description: "Get Previous 20 Locations in Pokemon",
 			callback:    commandMapb,
 		},

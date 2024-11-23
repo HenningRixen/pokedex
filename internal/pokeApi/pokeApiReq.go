@@ -112,8 +112,9 @@ func (c *Client) GetLocationAreaBodyResponse(urlLocationArea *string) MapBodyRes
 	return mapBodyResponse
 }
 
-func (c *Client) GetLoactionPokemonEncounterBodyResponse() ExploreBodyResponse {
-	url := "https://pokeapi.co/api/v2/location-area/canalave-city-area"
+func (c *Client) GetLoactionPokemonEncounterBodyResponse(location *string) ExploreBodyResponse {
+
+	url := "https://pokeapi.co/api/v2/location-area/" + *location
 
 	if val, ok := c.cache.Get(url); ok {
 		exploreResp := ExploreBodyResponse{}
