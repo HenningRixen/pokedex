@@ -13,7 +13,7 @@ func commandHelp(config *config) error {
 	for _, command := range commandMap {
 		fmt.Println(command.name + ": " + command.description)
 	}
-	fmt.Print("Pokedex: ")
+	fmt.Println("")
 	return nil
 }
 
@@ -30,7 +30,6 @@ func commandMap(config *config) error {
 	for _, result := range locationAreaStruct.Results {
 		fmt.Println(result.Name)
 	}
-	fmt.Print("Pokedex: ")
 
 	return nil
 }
@@ -46,7 +45,6 @@ func commandMapb(config *config) error {
 		for _, result := range locationAreaStruct.Results {
 			fmt.Println(result.Name)
 		}
-		fmt.Print("Pokedex: ")
 	}
 
 	return nil
