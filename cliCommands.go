@@ -54,10 +54,13 @@ func commandMapb(config *config) error {
 
 func commandExplore(config *config) error {
 	location := config.location
-	exploreLocationAreaStruct := config.pokeApiClient.GetLoactionPokemonEncounterBodyResponse(location)
+	err, exploreLocationAreaStruct := config.pokeApiClient.GetLoactionPokemonEncounterBodyResponse(location)
+	if err != nil {
+		fmt.Println("something went wrong in the request")
+	}
 	for _, result := range exploreLocationAreaStruct.PokemonEncounters {
 		fmt.Println(result.Pokemon.Name)
-		fmt.Print("Pokedex: ")
 	}
+
 	return nil
 }

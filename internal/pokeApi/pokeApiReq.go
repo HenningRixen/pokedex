@@ -2,6 +2,7 @@ package pokeapi
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -112,7 +113,7 @@ func (c *Client) GetLocationAreaBodyResponse(urlLocationArea *string) MapBodyRes
 	return mapBodyResponse
 }
 
-func (c *Client) GetLoactionPokemonEncounterBodyResponse(location *string) ExploreBodyResponse {
+func (c *Client) GetLoactionPokemonEncounterBodyResponse(location *string) (error, ExploreBodyResponse) {
 
 	url := "https://pokeapi.co/api/v2/location-area/" + *location
 
@@ -120,33 +121,34 @@ func (c *Client) GetLoactionPokemonEncounterBodyResponse(location *string) Explo
 		exploreResp := ExploreBodyResponse{}
 		err := json.Unmarshal(val, &exploreResp)
 		if err != nil {
-			log.Fatal(err)
+			return err, ExploreBodyResponse{}
 		}
 
-		return exploreResp
+		return nil, exploreResp
 	}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err, ExploreBodyResponse{}
 	}
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		return err, ExploreBodyResponse{}
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
 	if resp.StatusCode > 299 {
-		log.Fatalf("Response failed with status code: %d and\nbody: %s\n", resp.StatusCode, body)
+		fmt.Printf("Response failed with status code: %d and\nbody: %s\n", resp.StatusCode, body)
+
 	}
 	if err != nil {
-		log.Fatal(err)
+		return err, ExploreBodyResponse{}
 	}
 
 	exploreBodyResponse := ExploreBodyResponse{}
 	err = json.Unmarshal(body, &exploreBodyResponse)
 	if err != nil {
-		log.Fatal(err)
+		return err, ExploreBodyResponse{}
 	}
 	c.cache.Add(url, body)
-	return exploreBodyResponse
+	return nil, exploreBodyResponse
 }

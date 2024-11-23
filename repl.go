@@ -46,15 +46,16 @@ func startLoop(config *config) {
 		if cleanInputCommand[0] == "explore" {
 			if cmd, exits := commandmap["explore"]; exits {
 				if len(cleanInputCommand) == 1 {
-					fmt.Print("Pokedex: explore needs two inputs seperated by withespace")
-					fmt.Print("Pokedex: ")
+					fmt.Println("Pokedex: explore needs two inputs (command and location) seperated by withespace")
 				} else {
 					config.location = &cleanInputCommand[1]
 					cmd.callback(config)
 				}
 			}
 		}
-		fmt.Println("Unkown Command", cleanInputCommand)
+		if _, exits := commandmap[cleanInputCommand[0]]; !exits {
+			fmt.Println("Unkown Command", cleanInputCommand)
+		}
 		fmt.Print("Pokedex: ")
 	}
 }
