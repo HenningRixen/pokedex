@@ -99,5 +99,11 @@ func commandsMapCreate() map[string]cliCommand {
 			description: "Get Pokemon you can encounter in this Location",
 			callback:    commandExplore,
 		},
+		"catch": {
+			name:        "catch",
+			description: "Catch a Pokemon with a propability and Save it to your bag",
+			callback:    commandCatch,
+		},
+		
 	}
 }

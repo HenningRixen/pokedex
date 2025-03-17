@@ -47,6 +47,7 @@ func commandMapb(config *config) error {
 		}
 	}
 
+
 	return nil
 }
 
@@ -60,5 +61,10 @@ func commandExplore(config *config) error {
 		fmt.Println(result.Pokemon.Name)
 	}
 
+	return nil
+}
+
+func commandCatch(config *config) error {
+	err, pokemon := config.pokeApiClient.GetPokemon()
 	return nil
 }
