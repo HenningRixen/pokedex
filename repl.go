@@ -15,6 +15,7 @@ type config struct {
 	previousLocationUrl *string
 	location            *string
 	pokemon             *string
+	pokemonInspect      *string
 }
 
 func startLoop(config *config) {
@@ -59,7 +60,7 @@ func startLoop(config *config) {
 		if cleanInputCommand[0] == "catch" {
 			if cmd, exits := commandmap["catch"]; exits {
 				if len(cleanInputCommand) == 1 {
-					fmt.Println("Pokedex: explore needs two inputs (command and pokemon) seperated by withespace")
+					fmt.Println("Pokedex: catch needs two inputs (command and pokemon) seperated by withespace")
 				} else {
 					config.pokemon = &cleanInputCommand[1]
 					cmd.callback(config)
@@ -71,7 +72,16 @@ func startLoop(config *config) {
 				cmd.callback(config)
 			} 
 		}
-
+		if cleanInputCommand[0] == "inspect" {
+			if cmd, exits := commandmap["inspect"]; exits {
+				if len(cleanInputCommand) == 1 {
+					fmt.Println("Pokedex: inspect needs two inputs (command and pokemon) seperated by withespace")
+				} else {
+					config.pokemonInspect = &cleanInputCommand[1]
+					cmd.callback(config)
+				}
+			}
+		}
 
 		if _, exits := commandmap[cleanInputCommand[0]]; !exits {
 			fmt.Println("Unkown Command", cleanInputCommand)
@@ -132,6 +142,13 @@ func commandsMapCreate(pokedexmap *map[string]pokeapi.Pokemon) map[string]cliCom
 			description: "Look at the Pokemon in the Pokedex",
 			callback:    func(c *config) error {
 				return commandPokedex(pokedexmap)
+			},
+		},
+		"inspect": {
+			name:"inspect",
+			description: "Inspect caught Pokemon",
+			callback: func(c *config) error {
+				return commandInspect(c, pokedexmap)
 			},
 		},
 		

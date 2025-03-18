@@ -88,8 +88,30 @@ func commandCatch(config *config, pokedexmap *map[string]pokeapi.Pokemon) error 
 }
 
 func commandPokedex(pokedexmap *map[string]pokeapi.Pokemon) error {
-	for key := range *pokedexmap {
+	for key, value := range *pokedexmap {
 		println(key)
+		println(value.BaseExperience)
+	}
+
+	return nil
+}
+
+func commandInspect(config *config, pokedexmap *map[string]pokeapi.Pokemon) error {
+	pokemon := config.pokemonInspect
+	value, exists := (*pokedexmap)[*pokemon]
+	if exists {
+		println("Name:" + value.Name)
+		println(fmt.Sprintf("Height: %d", value.Height))
+		println(fmt.Sprintf("Weight: %d", value.Weight))
+		for _, value := range value.Stats {
+			println(fmt.Sprintf("-%s: %d", value.Stat.Name, value.BaseStat))
+		}
+		println("Types:")
+		for _, value := range value.Types {
+			println("-" + value.Type.Name)
+		}
+	} else {
+		println("pokemon not caught yet")
 	}
 
 	return nil
