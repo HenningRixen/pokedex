@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
+
+	pokeapi "github.com/HenningRixen/pokedex/internal/pokeApi"
 )
 
 func commandHelp(config *config) error {
-	commandMap := commandsMapCreate()
+	commandMap := commandsMapCreate(nil)
 	fmt.Println("")
 	fmt.Println("Welcome to the Pokedex!\nUsage:")
 	fmt.Println("")
@@ -18,6 +21,7 @@ func commandHelp(config *config) error {
 }
 
 func commandExit(config *config) error {
+	println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
@@ -64,7 +68,29 @@ func commandExplore(config *config) error {
 	return nil
 }
 
-func commandCatch(config *config) error {
-	err, pokemon := config.pokeApiClient.GetPokemon()
+func commandCatch(config *config, pokedexmap *map[string]pokeapi.Pokemon) error {
+	pokemon := config.pokemon
+	println("Throwing Pokeball at" + *pokemon + "...")
+	err, pokemonResponse := config.pokeApiClient.GetPokemon(pokemon)
+	if err != nil {
+		fmt.Println("something wrong with request")
+	}
+	catchChance := rand.Intn(pokemonResponse.BaseExperience)
+	if (catchChance < 80) {
+		println("Pokemon caught, adding it to pokedex")
+		// pointer here?
+		(*pokedexmap)[pokemonResponse.Name] = pokemonResponse
+	} else {
+		println("didnt catch it bitch try again")
+	}
+
+	return nil
+}
+
+func commandPokedex(pokedexmap *map[string]pokeapi.Pokemon) error {
+	for key := range *pokedexmap {
+		println(key)
+	}
+
 	return nil
 }

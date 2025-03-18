@@ -14,12 +14,15 @@ type config struct {
 	nextLocationUrl     *string
 	previousLocationUrl *string
 	location            *string
+	pokemon             *string
 }
 
 func startLoop(config *config) {
 	fmt.Print("Pokedex: ")
 	scanner := bufio.NewScanner(os.Stdin)
-	commandmap := commandsMapCreate()
+	pokedexmap := map[string]pokeapi.Pokemon{}
+	pokedexmapPoint := &pokedexmap
+	commandmap := commandsMapCreate(pokedexmapPoint)
 	for scanner.Scan() {
 		inputCommand := scanner.Text()
 		cleanInputCommand := cleanInput(inputCommand)
@@ -53,6 +56,23 @@ func startLoop(config *config) {
 				}
 			}
 		}
+		if cleanInputCommand[0] == "catch" {
+			if cmd, exits := commandmap["catch"]; exits {
+				if len(cleanInputCommand) == 1 {
+					fmt.Println("Pokedex: explore needs two inputs (command and pokemon) seperated by withespace")
+				} else {
+					config.pokemon = &cleanInputCommand[1]
+					cmd.callback(config)
+				}
+			}
+		}
+		if cleanInputCommand[0] == "pokedex" {
+			if cmd, exits := commandmap["pokedex"]; exits {
+				cmd.callback(config)
+			} 
+		}
+
+
 		if _, exits := commandmap[cleanInputCommand[0]]; !exits {
 			fmt.Println("Unkown Command", cleanInputCommand)
 		}
@@ -72,7 +92,7 @@ type cliCommand struct {
 	callback    func(*config) error
 }
 
-func commandsMapCreate() map[string]cliCommand {
+func commandsMapCreate(pokedexmap *map[string]pokeapi.Pokemon) map[string]cliCommand {
 	return map[string]cliCommand{
 		"help": {
 			name:        "help",
@@ -102,7 +122,17 @@ func commandsMapCreate() map[string]cliCommand {
 		"catch": {
 			name:        "catch",
 			description: "Catch a Pokemon with a propability and Save it to your bag",
-			callback:    commandCatch,
+			callback:    func(c *config) error {
+				return commandCatch(c, pokedexmap)
+			},
+
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Look at the Pokemon in the Pokedex",
+			callback:    func(c *config) error {
+				return commandPokedex(pokedexmap)
+			},
 		},
 		
 	}

@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 )
-func (c *Client) GetPokemon(pokemon * string) (error, Pokemon) {
+func (c *Client) GetPokemon(pokemon *string) (error, Pokemon) {
 	url := "https://pokeapi.co/api/v2/pokemon/" + *pokemon
 	req, err := http.NewRequest("GET", url , nil)
 	if err != nil {
@@ -32,7 +32,6 @@ func (c *Client) GetPokemon(pokemon * string) (error, Pokemon) {
 	if err != nil {
 		return err, Pokemon{}
 	}
-	println(pokemonResponse)
 	return nil, pokemonResponse
 }
 
