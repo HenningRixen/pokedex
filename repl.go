@@ -16,12 +16,15 @@ type config struct {
 	location            *string
 	pokemon             *string
 	pokemonInspect      *string
+	pokemonMoves        *string
+	pokemonLearn        *string
+	learn               *string
 }
 
 func startLoop(config *config) {
 	fmt.Print("Pokedex: ")
 	scanner := bufio.NewScanner(os.Stdin)
-	pokedexmap := map[string]pokeapi.Pokemon{}
+	pokedexmap := map[string]pokeapi.PokemonExtended{}
 	pokedexmapPoint := &pokedexmap
 	commandmap := commandsMapCreate(pokedexmapPoint)
 	for scanner.Scan() {
@@ -70,7 +73,7 @@ func startLoop(config *config) {
 		if cleanInputCommand[0] == "pokedex" {
 			if cmd, exits := commandmap["pokedex"]; exits {
 				cmd.callback(config)
-			} 
+			}
 		}
 		if cleanInputCommand[0] == "inspect" {
 			if cmd, exits := commandmap["inspect"]; exits {
@@ -78,6 +81,27 @@ func startLoop(config *config) {
 					fmt.Println("Pokedex: inspect needs two inputs (command and pokemon) seperated by withespace")
 				} else {
 					config.pokemonInspect = &cleanInputCommand[1]
+					cmd.callback(config)
+				}
+			}
+		}
+		if cleanInputCommand[0] == "moves" {
+			if cmd, exits := commandmap["moves"]; exits {
+				if len(cleanInputCommand) == 1 {
+					fmt.Println("Pokedex: moves needs two inputs (command and pokemon) seperated by withespace")
+				} else {
+					config.pokemonMoves = &cleanInputCommand[1]
+					cmd.callback(config)
+				}
+			}
+		}
+		// needs three inputs
+		if cleanInputCommand[0] == "learnmove" {
+			if cmd, exits := commandmap["learnmove"]; exits {
+				if len(cleanInputCommand) == 1 {
+					fmt.Println("Pokedex: learnmove needs two inputs (command and pokemon) seperated by withespace")
+				} else {
+					config.pokemonMoves = &cleanInputCommand[1]
 					cmd.callback(config)
 				}
 			}
@@ -102,7 +126,7 @@ type cliCommand struct {
 	callback    func(*config) error
 }
 
-func commandsMapCreate(pokedexmap *map[string]pokeapi.Pokemon) map[string]cliCommand {
+func commandsMapCreate(pokedexmap *map[string]pokeapi.PokemonExtended) map[string]cliCommand {
 	return map[string]cliCommand{
 		"help": {
 			name:        "help",
@@ -132,25 +156,37 @@ func commandsMapCreate(pokedexmap *map[string]pokeapi.Pokemon) map[string]cliCom
 		"catch": {
 			name:        "catch",
 			description: "Catch a Pokemon with a propability and Save it to your bag",
-			callback:    func(c *config) error {
+			callback: func(c *config) error {
 				return commandCatch(c, pokedexmap)
 			},
-
 		},
 		"pokedex": {
 			name:        "pokedex",
 			description: "Look at the Pokemon in the Pokedex",
-			callback:    func(c *config) error {
+			callback: func(c *config) error {
 				return commandPokedex(pokedexmap)
 			},
 		},
 		"inspect": {
-			name:"inspect",
+			name:        "inspect",
 			description: "Inspect caught Pokemon",
 			callback: func(c *config) error {
 				return commandInspect(c, pokedexmap)
 			},
 		},
-		
+		"moves": {
+			name:        "moves",
+			description: "Moves a Pokemon has to harm others",
+			callback: func(c *config) error {
+				return commandMoves(c, pokedexmap)
+			},
+		},
+		"learnmoves": {
+			name:        "learnmoves",
+			description: "Learn Moves a Pokemon can learn to harm others",
+			callback: func(c *config) error {
+				return commandLearnMove(c, pokedexmap)
+			},
+		},
 	}
 }

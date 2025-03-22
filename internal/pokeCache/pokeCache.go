@@ -33,6 +33,7 @@ func (c *Cache) Add(key string, value []byte) {
 func (c *Cache) Get(key string) ([]byte, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+
 	foundCacheEntryValue, ok := c.cache[key]
 	return foundCacheEntryValue.val, ok
 }

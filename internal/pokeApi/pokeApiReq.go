@@ -7,12 +7,14 @@ import (
 	"log"
 	"net/http"
 )
+
 func (c *Client) GetPokemon(pokemon *string) (error, Pokemon) {
 	url := "https://pokeapi.co/api/v2/pokemon/" + *pokemon
-	req, err := http.NewRequest("GET", url , nil)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err, Pokemon{}
 	}
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return err, Pokemon{}
@@ -115,4 +117,33 @@ func (c *Client) GetLoactionPokemonEncounterBodyResponse(location *string) (erro
 	}
 	c.cache.Add(url, body)
 	return nil, exploreBodyResponse
+}
+
+func (c *Client) GetMove(move *string) (error, PokemonMove) {
+	url := "https://pokeapi.co/api/v2/move/" + *move
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err, PokemonMove{}
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return err, PokemonMove{}
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if resp.StatusCode > 299 {
+		fmt.Printf("Response failed with status code: %d and\nbody: %s\n", resp.StatusCode, body)
+
+	}
+	if err != nil {
+		return err, PokemonMove{}
+	}
+
+	pokemonResponse := PokemonMove{}
+	err = json.Unmarshal(body, &pokemonResponse)
+	if err != nil {
+		return err, PokemonMove{}
+	}
+	return nil, pokemonResponse
 }

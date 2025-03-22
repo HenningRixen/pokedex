@@ -51,7 +51,6 @@ func commandMapb(config *config) error {
 		}
 	}
 
-
 	return nil
 }
 
@@ -68,7 +67,7 @@ func commandExplore(config *config) error {
 	return nil
 }
 
-func commandCatch(config *config, pokedexmap *map[string]pokeapi.Pokemon) error {
+func commandCatch(config *config, pokedexmap *map[string]pokeapi.PokemonExtended) error {
 	pokemon := config.pokemon
 	println("Throwing Pokeball at" + *pokemon + "...")
 	err, pokemonResponse := config.pokeApiClient.GetPokemon(pokemon)
@@ -76,10 +75,13 @@ func commandCatch(config *config, pokedexmap *map[string]pokeapi.Pokemon) error 
 		fmt.Println("something wrong with request")
 	}
 	catchChance := rand.Intn(pokemonResponse.BaseExperience)
-	if (catchChance < 80) {
+	if catchChance < 80 {
 		println("Pokemon caught, adding it to pokedex")
 		// pointer here?
-		(*pokedexmap)[pokemonResponse.Name] = pokemonResponse
+		(*pokedexmap)[pokemonResponse.Name] = pokeapi.PokemonExtended{
+			Pokemon:            pokemonResponse,
+			PokemonLearntMoves: nil,
+		}
 	} else {
 		println("didnt catch it bitch try again")
 	}
@@ -87,32 +89,65 @@ func commandCatch(config *config, pokedexmap *map[string]pokeapi.Pokemon) error 
 	return nil
 }
 
-func commandPokedex(pokedexmap *map[string]pokeapi.Pokemon) error {
+func commandPokedex(pokedexmap *map[string]pokeapi.PokemonExtended) error {
 	for key, value := range *pokedexmap {
 		println(key)
-		println(value.BaseExperience)
+		println(value.Pokemon.BaseExperience)
 	}
 
 	return nil
 }
 
-func commandInspect(config *config, pokedexmap *map[string]pokeapi.Pokemon) error {
+func commandInspect(config *config, pokedexmap *map[string]pokeapi.PokemonExtended) error {
 	pokemon := config.pokemonInspect
 	value, exists := (*pokedexmap)[*pokemon]
 	if exists {
-		println("Name:" + value.Name)
-		println(fmt.Sprintf("Height: %d", value.Height))
-		println(fmt.Sprintf("Weight: %d", value.Weight))
-		for _, value := range value.Stats {
+		println("Name:" + value.Pokemon.Name)
+		println(fmt.Sprintf("Height: %d", value.Pokemon.Height))
+		println(fmt.Sprintf("Weight: %d", value.Pokemon.Weight))
+		for _, value := range value.Pokemon.Stats {
 			println(fmt.Sprintf("-%s: %d", value.Stat.Name, value.BaseStat))
 		}
 		println("Types:")
-		for _, value := range value.Types {
+		for _, value := range value.Pokemon.Types {
 			println("-" + value.Type.Name)
+		}
+		for _, value := range value.PokemonLearntMoves {
+			println(value.Name)
 		}
 	} else {
 		println("pokemon not caught yet")
 	}
 
+	return nil
+}
+
+func commandMoves(config *config, pokedexmap *map[string]pokeapi.PokemonExtended) error {
+	pokemon := config.pokemonMoves
+	values, exists := (*pokedexmap)[*pokemon]
+	if exists {
+		println("Moves:")
+		for _, value := range values.Pokemon.Moves {
+			println(value.Move.Name)
+		}
+	} else {
+		println("pokemon not caught yet")
+	}
+
+	return nil
+}
+
+func commandLearnMove(pokemon *string, move *string, pokedexmap *map[string]pokeapi.PokemonExtended, config *config) error {
+	existingPokemon, exists := (*pokedexmap)[*pokemon]
+
+	if exists {
+		err, move := config.pokeApiClient.GetMove(move)
+		if err != nil {
+			fmt.Println("something went wrong in the request")
+		}
+
+		existingPokemon.PokemonLearntMoves = append(existingPokemon.PokemonLearntMoves, move)
+
+	}
 	return nil
 }
