@@ -30,24 +30,40 @@ func startLoop(config *config) {
 	for scanner.Scan() {
 		inputCommand := scanner.Text()
 		cleanInputCommand := cleanInput(inputCommand)
+
 		if cleanInputCommand[0] == "help" {
 			if cmd, exits := commandmap["help"]; exits {
-				cmd.callback(config)
+				err := cmd.callback(config)
+				if err != nil {
+					println("error in help")
+				}
+
 			}
 		}
 		if cleanInputCommand[0] == "exit" {
 			if cmd, exits := commandmap["exit"]; exits {
-				cmd.callback(config)
+				err := cmd.callback(config)
+				if err != nil {
+					println("error in exit")
+				}
+
 			}
 		}
 		if cleanInputCommand[0] == "map" {
 			if cmd, exits := commandmap["map"]; exits {
-				cmd.callback(config)
+				err := cmd.callback(config)
+				if err != nil {
+					println("error in map")
+				}
 			}
 		}
 		if cleanInputCommand[0] == "mapb" {
 			if cmd, exits := commandmap["mapb"]; exits {
-				cmd.callback(config)
+				err := cmd.callback(config)
+				if err != nil {
+					println("error in map")
+				}
+
 			}
 		}
 		if cleanInputCommand[0] == "explore" {
@@ -56,7 +72,11 @@ func startLoop(config *config) {
 					fmt.Println("Pokedex: explore needs two inputs (command and location) seperated by withespace")
 				} else {
 					config.location = &cleanInputCommand[1]
-					cmd.callback(config)
+					err := cmd.callback(config)
+					if err != nil {
+						println("error in map")
+					}
+
 				}
 			}
 		}
@@ -66,13 +86,21 @@ func startLoop(config *config) {
 					fmt.Println("Pokedex: catch needs two inputs (command and pokemon) seperated by withespace")
 				} else {
 					config.pokemon = &cleanInputCommand[1]
-					cmd.callback(config)
+					err := cmd.callback(config)
+					if err != nil {
+						println("error in map")
+					}
+
 				}
 			}
 		}
 		if cleanInputCommand[0] == "pokedex" {
 			if cmd, exits := commandmap["pokedex"]; exits {
-				cmd.callback(config)
+				err := cmd.callback(config)
+				if err != nil {
+					println("error in map")
+				}
+
 			}
 		}
 		if cleanInputCommand[0] == "inspect" {
@@ -81,7 +109,11 @@ func startLoop(config *config) {
 					fmt.Println("Pokedex: inspect needs two inputs (command and pokemon) seperated by withespace")
 				} else {
 					config.pokemonInspect = &cleanInputCommand[1]
-					cmd.callback(config)
+					err := cmd.callback(config)
+					if err != nil {
+						println("error in map")
+					}
+
 				}
 			}
 		}
@@ -91,18 +123,26 @@ func startLoop(config *config) {
 					fmt.Println("Pokedex: moves needs two inputs (command and pokemon) seperated by withespace")
 				} else {
 					config.pokemonMoves = &cleanInputCommand[1]
-					cmd.callback(config)
+					err := cmd.callback(config)
+					if err != nil {
+						println("error in map")
+					}
+
 				}
 			}
 		}
-		// needs three inputs
-		if cleanInputCommand[0] == "learnmove" {
-			if cmd, exits := commandmap["learnmove"]; exits {
+		if cleanInputCommand[0] == "learn" {
+			if cmd, exits := commandmap["learn"]; exits {
 				if len(cleanInputCommand) == 1 {
-					fmt.Println("Pokedex: learnmove needs two inputs (command and pokemon) seperated by withespace")
+					fmt.Println("Pokedex: learnmove needs three inputs (learnmove and pokemon and move to be learned) seperated by withespace")
 				} else {
-					config.pokemonMoves = &cleanInputCommand[1]
-					cmd.callback(config)
+					config.pokemonLearn = &cleanInputCommand[1]
+					config.learn = &cleanInputCommand[2]
+					err := cmd.callback(config)
+					if err != nil {
+						println("error in map")
+					}
+
 				}
 			}
 		}
@@ -181,11 +221,11 @@ func commandsMapCreate(pokedexmap *map[string]pokeapi.PokemonExtended) map[strin
 				return commandMoves(c, pokedexmap)
 			},
 		},
-		"learnmoves": {
-			name:        "learnmoves",
+		"learn": {
+			name:        "learn",
 			description: "Learn Moves a Pokemon can learn to harm others",
 			callback: func(c *config) error {
-				return commandLearnMove(c, pokedexmap)
+				return commandLearnMove(c.pokemonLearn, c.learn, pokedexmap, c)
 			},
 		},
 	}

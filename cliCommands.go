@@ -77,7 +77,6 @@ func commandCatch(config *config, pokedexmap *map[string]pokeapi.PokemonExtended
 	catchChance := rand.Intn(pokemonResponse.BaseExperience)
 	if catchChance < 80 {
 		println("Pokemon caught, adding it to pokedex")
-		// pointer here?
 		(*pokedexmap)[pokemonResponse.Name] = pokeapi.PokemonExtended{
 			Pokemon:            pokemonResponse,
 			PokemonLearntMoves: nil,
@@ -100,20 +99,21 @@ func commandPokedex(pokedexmap *map[string]pokeapi.PokemonExtended) error {
 
 func commandInspect(config *config, pokedexmap *map[string]pokeapi.PokemonExtended) error {
 	pokemon := config.pokemonInspect
-	value, exists := (*pokedexmap)[*pokemon]
+	pokemonInMap, exists := (*pokedexmap)[*pokemon]
 	if exists {
-		println("Name:" + value.Pokemon.Name)
-		println(fmt.Sprintf("Height: %d", value.Pokemon.Height))
-		println(fmt.Sprintf("Weight: %d", value.Pokemon.Weight))
-		for _, value := range value.Pokemon.Stats {
-			println(fmt.Sprintf("-%s: %d", value.Stat.Name, value.BaseStat))
+		println("Name:" + pokemonInMap.Pokemon.Name)
+		println(fmt.Sprintf("Height: %d", pokemonInMap.Pokemon.Height))
+		println(fmt.Sprintf("Weight: %d", pokemonInMap.Pokemon.Weight))
+		for _, stat := range pokemonInMap.Pokemon.Stats {
+			println(fmt.Sprintf("-%s: %d", stat.Stat.Name, stat.BaseStat))
 		}
 		println("Types:")
-		for _, value := range value.Pokemon.Types {
-			println("-" + value.Type.Name)
+		for _, typ := range pokemonInMap.Pokemon.Types {
+			println("-" + typ.Type.Name)
 		}
-		for _, value := range value.PokemonLearntMoves {
-			println(value.Name)
+		println("Learned Moves:")
+		for _, move := range pokemonInMap.PokemonLearntMoves {
+			fmt.Println("Pokemon learnt moves:", move.Name)
 		}
 	} else {
 		println("pokemon not caught yet")
@@ -142,12 +142,16 @@ func commandLearnMove(pokemon *string, move *string, pokedexmap *map[string]poke
 
 	if exists {
 		err, move := config.pokeApiClient.GetMove(move)
+
 		if err != nil {
 			fmt.Println("something went wrong in the request")
 		}
 
 		existingPokemon.PokemonLearntMoves = append(existingPokemon.PokemonLearntMoves, move)
-
+		(*pokedexmap)[*pokemon] = existingPokemon
+		for _, move := range existingPokemon.PokemonLearntMoves {
+			fmt.Println("Pokemon learnt moves:", move.Name)
+		}
 	}
 	return nil
 }
